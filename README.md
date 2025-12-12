@@ -1,94 +1,197 @@
-# Obsidian Sample Plugin
+# Bases New Vault From Template
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+一个简单的 Obsidian 插件，允许你通过自定义模板和指定文件夹位置来创建新文件，替代 Obsidian bases 默认的新建文件行为。
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## 📖 简介
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+Bases New Vault From Template 插件可以拦截 bases 的新建文件操作，让你能够：
+- 使用自定义模板创建新文件
+- 手动选择要使用的模板
+- 指定新文件的创建位置
 
-## First time developing plugins?
+这个插件特别适合需要频繁使用模板创建标准化文档的用户，比如日记、笔记、项目文档等。
 
-Quick starting guide for new plugin devs:
+## ✨ 功能特性
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+### 核心功能
 
-## Releasing new releases
+- **模板化创建文件**：使用预定义的模板文件创建新文件，保持文档格式的一致性
+- **阻止默认行为**：完全拦截 bases 的新建文件操作，使用自定义逻辑替代
+- **智能文件夹选择**：创建文件时可以选择目标文件夹，支持搜索功能
+- **模板选择器**：可选的手动模板选择功能，支持从多个模板中选择
+- **空白文件支持**：如果模板文件不存在，自动创建空白文件并给出提示
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+### 高级特性
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+- **搜索文件夹**：在文件夹选择器中输入关键词快速查找目标文件夹
+- **当前文件夹检测**：自动检测当前打开的笔记所在文件夹，作为默认创建位置
+- **文件命名**：自动生成带时间戳的文件名，避免文件名冲突
 
-## Adding your plugin to the community plugin list
+## 🚀 安装
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+### 从源码安装
 
-## How to use
+1. 克隆或下载此仓库
+2. 在项目目录下运行：
+   ```bash
+   npm install
+   ```
+3. 运行开发模式：
+   ```bash
+   npm run dev
+   ```
+4. 将编译后的文件复制到你的 Obsidian 插件目录：
+   - `main.js`
+   - `styles.css`
+   - `manifest.json`
+   
+   目标路径：`<你的仓库>/.obsidian/plugins/bases-new-vault-from-template/`
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+5. 在 Obsidian 中启用插件：**设置 → 社区插件 → 启用插件**
 
-## Manually installing the plugin
+### 从社区插件市场安装（如果已发布）
 
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
+1. 打开 Obsidian 设置
+2. 进入 **社区插件**
+3. 搜索 "Bases New Vault From Template"
+4. 点击安装并启用
 
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint ./src/`
+## 📝 使用方法
 
-## Funding URL
+### 基本使用
 
-You can include funding URLs where people who use your plugin can financially support it.
+1. **配置默认模板**：
+   - 打开 **设置 → 插件设置 → Bases New Vault From Template**
+   - 在"默认模板文件路径"中输入你的模板文件路径（例如：`Templates/日记模板.md`）
 
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
+2. **点击新建按钮**：
+   - 点击工具栏中的新建按钮（class 为 `bases-toolbar-item bases-toolbar-new-item-menu`）
+   - 插件会自动使用配置的模板创建新文件
 
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+### 高级使用
+
+#### 启用模板选择器
+
+1. 在插件设置中，启用"手动选择模板"开关
+2. 设置"模板文件夹路径"（例如：`Templates`）
+3. 点击新建按钮时，会弹出模板选择器
+4. 从列表中选择要使用的模板，或选择"空白模板"创建空文件
+
+#### 选择文件夹位置
+
+当启用模板选择器时：
+1. 在模板选择器顶部，会显示文件夹选择器
+2. 点击文件夹输入框，展开下拉列表
+3. 在搜索框中输入文件夹名称进行搜索
+4. 选择目标文件夹
+5. 选择模板后，新文件将创建在选定的文件夹中
+
+## ⚙️ 配置说明
+
+### 设置选项
+
+| 设置项 | 说明 | 默认值 |
+|--------|------|--------|
+| **手动选择模板** | 启用后，点击新建按钮时会弹出模板选择器 | 关闭 |
+| **模板文件夹路径** | 模板文件所在的文件夹路径 | `Templates` |
+| **默认模板文件路径** | 未启用手动选择时使用的默认模板路径 | `Templates/模板.md` |
+
+### 配置示例
+
+**场景 1：使用单一模板**
+```
+手动选择模板：关闭
+默认模板文件路径：Templates/日记模板.md
 ```
 
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
+**场景 2：多模板选择**
+```
+手动选择模板：开启
+模板文件夹路径：Templates
+默认模板文件路径：Templates/默认模板.md
 ```
 
-## API Documentation
+## ⚠️ 注意事项
 
-See https://github.com/obsidianmd/obsidian-api
+### 重要提示
+
+1. **按钮类名依赖**：此插件依赖于特定的按钮类名（`bases-toolbar-item bases-toolbar-new-item-menu`）。如果 Obsidian 更新导致类名变化，插件可能无法正常工作。
+
+2. **模板文件路径**：
+   - 模板文件路径是相对于仓库根目录的
+   - 确保模板文件存在，否则会创建空白文件
+   - 路径区分大小写
+
+3. **文件夹选择**：
+   - 如果选择的文件夹不存在，创建文件可能会失败
+   - 建议在创建前确保目标文件夹存在
+
+4. **文件命名**：
+   - 新文件使用时间戳命名：`新文件-YYYY-MM-DD-HH-MM-SS.md`
+   - 如果文件名冲突，Obsidian 会自动处理
+
+5. **性能考虑**：
+   - 如果仓库中有大量文件夹，加载文件夹列表可能需要一些时间
+   - 建议将模板文件集中放在一个文件夹中
+
+### 兼容性
+
+- **Obsidian 版本**：需要 0.15.0 或更高版本
+- **平台支持**：支持桌面端和移动端（`isDesktopOnly: false`）
+
+## 🛠️ 开发
+
+### 开发环境设置
+
+1. 确保 Node.js 版本 >= 16
+2. 安装依赖：
+   ```bash
+   npm install
+   ```
+3. 启动开发模式：
+   ```bash
+   npm run dev
+   ```
+4. 修改 `main.ts` 后，会自动编译到 `main.js`
+
+### 项目结构
+
+```
+obsidian-sample-plugin/
+├── main.ts          # 主插件文件
+├── styles.css       # 样式文件
+├── manifest.json    # 插件清单
+├── package.json     # 项目配置
+└── README.md        # 说明文档
+```
+
+### 构建生产版本
+
+```bash
+npm run build
+```
+
+## 🐛 问题反馈
+
+如果遇到问题或有功能建议，请通过以下方式反馈：
+
+- 在 GitHub 仓库中提交 Issue
+- 联系作者：Link3750
+
+## 📄 许可证
+
+请查看项目根目录下的 LICENSE 文件。
+
+## 🙏 致谢
+
+- 基于 [Obsidian Sample Plugin](https://github.com/obsidianmd/obsidian-sample-plugin) 开发
+- 感谢 Obsidian 团队提供的优秀 API
+
+## 📝 更新日志
+
+### v1.0.0
+- 初始版本发布
+- 支持模板化创建文件
+- 支持手动选择模板
+- 支持文件夹选择
+- 支持搜索文件夹功能
