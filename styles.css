@@ -1,0 +1,171 @@
+/*
+
+This CSS file will be included with your plugin, and
+available in the app when your plugin is enabled.
+
+If your plugin does not need CSS, delete this file.
+
+*/
+
+/* 模板选择器样式 */
+.template-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+	margin: 1rem 0;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.template-item {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: space-between;
+	gap: 0.75rem;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	transition: background-color 0.2s;
+}
+
+.template-item:hover {
+	background-color: var(--background-modifier-hover);
+}
+
+.template-info {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 0;
+	min-width: 0; /* 允许文本截断 */
+	overflow: hidden;
+}
+
+.template-name {
+	font-weight: 500;
+	font-size: 0.9em;
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
+.template-path {
+	font-size: 0.85em;
+	color: var(--text-muted);
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	flex: 1;
+	min-width: 0;
+}
+
+.template-button {
+	flex-shrink: 0;
+	min-width: 60px;
+	padding: 0.4rem 0.8rem;
+	font-size: 0.9em;
+}
+
+/* 文件夹选择器样式 */
+.folder-selector-container {
+	position: relative;
+	width: 100%;
+}
+
+.folder-input-wrapper {
+	position: relative;
+	width: 100%;
+}
+
+.folder-display-input {
+	width: 100%;
+	padding: 0.5rem;
+	border: 1px solid var(--background-modifier-border);
+	border-radius: 4px;
+	font-size: 0.9em;
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	cursor: pointer;
+	box-sizing: border-box;
+	transition: border-color 0.15s;
+}
+
+.folder-display-input:hover {
+	border-color: var(--interactive-accent);
+}
+
+.folder-display-input:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+	box-shadow: 0 0 0 2px var(--background-modifier-border-hover);
+}
+
+/* 当下拉框显示时，输入框的下边框应该消失 */
+.folder-input-wrapper.folder-dropdown-open .folder-display-input {
+	border-bottom: none;
+	border-bottom-left-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+.folder-search-input {
+	width: 100%;
+	padding: 0.5rem;
+	border: 1px solid var(--background-modifier-border);
+	border-top: none;
+	border-radius: 0;
+	font-size: 0.9em;
+	background-color: var(--background-primary);
+	color: var(--text-normal);
+	box-sizing: border-box;
+}
+
+.folder-search-input:focus {
+	outline: none;
+	border-color: var(--interactive-accent);
+	box-shadow: none;
+}
+
+.folder-dropdown-list {
+	position: absolute;
+	top: 100%;
+	left: 0;
+	right: 0;
+	margin-top: 0;
+	max-height: 300px;
+	overflow-y: auto;
+	background-color: var(--background-primary);
+	border: 1px solid var(--interactive-accent);
+	border-top: none;
+	border-radius: 0 0 4px 4px;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15), 0 0 0 2px var(--background-modifier-border-hover);
+	z-index: 1000;
+}
+
+.folder-dropdown-item {
+	padding: 0.5rem 0.75rem;
+	cursor: pointer;
+	font-size: 0.9em;
+	color: var(--text-normal);
+	transition: background-color 0.15s;
+	text-align: left;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.folder-dropdown-item:hover,
+.folder-dropdown-item-selected {
+	background-color: var(--background-modifier-hover);
+}
+
+.folder-dropdown-item-disabled {
+	color: var(--text-muted);
+	cursor: not-allowed;
+}
+
+.folder-dropdown-item-disabled:hover {
+	background-color: transparent;
+}
