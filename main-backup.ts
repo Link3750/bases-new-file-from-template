@@ -51,7 +51,7 @@ export default class MyPlugin extends Plugin {
 	}
 
 	// 根据模板创建新文件
-	async createFileFromTemplate(templatePath?: string, folderPath?: string) {
+	async createFileFromTemplate(templatePath?: string) {
 		try {
 			// 判断是否是明确选择空白模板
 			const isBlankTemplate = templatePath === '';
@@ -68,15 +68,13 @@ export default class MyPlugin extends Plugin {
 			const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-'); // HH-MM-SS
 			const newFileName = `新文件-${dateStr}-${timeStr}.md`;
 			
-			// 确定文件夹路径：优先使用传入的参数，否则使用当前文件所在文件夹，最后使用根目录
-			let targetFolderPath = folderPath;
-			if (!targetFolderPath) {
-				const activeFile = this.app.workspace.getActiveFile();
-				if (activeFile) {
-					const parent = activeFile.parent;
-					if (parent) {
-						targetFolderPath = parent.path;
-					}
+			// 获取当前文件夹路径（如果有打开的笔记，使用其所在文件夹）
+			let folderPath = '';
+			const activeFile = this.app.workspace.getActiveFile();
+			if (activeFile) {
+				const parent = activeFile.parent;
+				if (parent) {
+					folderPath = parent.path;
 				}
 			}
 			
@@ -92,7 +90,7 @@ export default class MyPlugin extends Plugin {
 			}
 			
 			// 创建新文件
-			const newFilePath = targetFolderPath ? `${targetFolderPath}/${newFileName}` : newFileName;
+			const newFilePath = folderPath ? `${folderPath}/${newFileName}` : newFileName;
 			const newFile = await this.app.vault.create(newFilePath, content);
 			
 			// 打开新创建的文件
@@ -164,8 +162,6 @@ class SampleModal extends Modal {
 class TemplateSelectorModal extends Modal {
 	plugin: MyPlugin;
 	templateFiles: TFile[] = [];
-	selectedFolderPath: string = '';
-	allFolders: TFolder[] = [];
 
 	constructor(app: App, plugin: MyPlugin) {
 		super(app);
@@ -177,208 +173,6 @@ class TemplateSelectorModal extends Modal {
 		contentEl.empty();
 
 		contentEl.createEl('h2', { text: '选择模板' });
-
-		// 加载所有文件夹
-		this.loadAllFolders();
-
-		// 文件夹选择器
-		const folderSetting = new Setting(contentEl)
-			.setName('选择文件夹')
-			.setDesc('选择新文件要创建的位置（可在搜索框中搜索文件夹名称）');
-		
-		// 创建文件夹选择器容器
-		const folderContainer = folderSetting.controlEl.createDiv('folder-selector-container');
-		
-		// 获取默认文件夹路径
-		const activeFile = this.app.workspace.getActiveFile();
-		let defaultFolderPath = '';
-		let defaultFolderText = '根目录';
-		if (activeFile) {
-			const parent = activeFile.parent;
-			if (parent) {
-				defaultFolderPath = parent.path;
-				defaultFolderText = `当前文件夹 (${defaultFolderPath})`;
-			}
-		} else {
-			// 如果没有打开的笔记，默认选择根目录
-			defaultFolderPath = '';
-			defaultFolderText = '根目录';
-		}
-		
-		// 存储所有文件夹选项数据
-		const folderOptions: Array<{value: string, text: string}> = [];
-		if (defaultFolderPath) {
-			folderOptions.push({ value: defaultFolderPath, text: defaultFolderText });
-		}
-		this.allFolders.forEach(folder => {
-			folderOptions.push({ value: folder.path, text: folder.path });
-		});
-		
-		// 设置默认选中值
-		this.selectedFolderPath = defaultFolderPath || '';
-		
-		// 显示当前选中值的输入框（只读）
-		const displayInput = folderContainer.createEl('input', {
-			type: 'text',
-			value: defaultFolderText,
-			cls: 'folder-display-input'
-		});
-		displayInput.readOnly = true;
-		
-		// 创建一个包装容器，将输入框和下拉列表组合在一起
-		const inputWrapper = folderContainer.createDiv('folder-input-wrapper');
-		inputWrapper.appendChild(displayInput);
-		
-		// 搜索输入框（用于过滤和搜索）
-		const searchInput = inputWrapper.createEl('input', {
-			type: 'text',
-			placeholder: '搜索文件夹名称...',
-			cls: 'folder-search-input'
-		});
-		searchInput.style.display = 'none'; // 初始隐藏
-		
-		// 悬浮下拉列表容器（放在同一个包装容器中）
-		const dropdownList = inputWrapper.createDiv('folder-dropdown-list');
-		dropdownList.style.display = 'none';
-		
-		// 当前显示的选项列表
-		let currentOptions = [...folderOptions];
-		let selectedIndex = defaultFolderPath ? 1 : 0; // 如果有默认文件夹，选中它；否则选中根目录（索引0）
-		
-		// 渲染下拉列表
-		const renderDropdown = (options: Array<{value: string, text: string}>) => {
-			dropdownList.empty();
-			
-			if (options.length === 0) {
-				const noResult = dropdownList.createDiv('folder-dropdown-item folder-dropdown-item-disabled');
-				noResult.textContent = '未找到匹配的文件夹';
-				return;
-			}
-			
-			options.forEach((option, index) => {
-				const item = dropdownList.createDiv('folder-dropdown-item');
-				item.textContent = option.text;
-				item.dataset.value = option.value;
-				
-				if (index === selectedIndex && option.value === this.selectedFolderPath) {
-					item.classList.add('folder-dropdown-item-selected');
-				}
-				
-				item.addEventListener('click', () => {
-					this.selectedFolderPath = option.value;
-					displayInput.value = option.text;
-					searchInput.value = '';
-					hideDropdown();
-				});
-				
-				item.addEventListener('mouseenter', () => {
-					// 移除所有选中状态
-					dropdownList.querySelectorAll('.folder-dropdown-item-selected').forEach(el => {
-						el.classList.remove('folder-dropdown-item-selected');
-					});
-					item.classList.add('folder-dropdown-item-selected');
-					selectedIndex = index;
-				});
-			});
-		};
-		
-		// 显示下拉列表
-		const showDropdown = () => {
-			renderDropdown(currentOptions);
-			dropdownList.style.display = 'block';
-			searchInput.style.display = 'block';
-			inputWrapper.classList.add('folder-dropdown-open');
-			searchInput.focus();
-		};
-		
-		// 隐藏下拉列表
-		const hideDropdown = () => {
-			dropdownList.style.display = 'none';
-			searchInput.style.display = 'none';
-			inputWrapper.classList.remove('folder-dropdown-open');
-			searchInput.value = '';
-			currentOptions = [...folderOptions];
-			selectedIndex = defaultFolderPath ? 1 : 0; // 如果有默认文件夹，选中它；否则选中根目录
-		};
-		
-		// 点击显示输入框时显示下拉列表
-		displayInput.addEventListener('click', (e) => {
-			e.stopPropagation();
-			if (dropdownList.style.display === 'none') {
-				showDropdown();
-			} else {
-				hideDropdown();
-			}
-		});
-		
-		// 搜索功能
-		searchInput.addEventListener('input', (e) => {
-			const searchTerm = (e.target as HTMLInputElement).value.toLowerCase().trim();
-			
-			if (searchTerm === '') {
-				currentOptions = [...folderOptions];
-				selectedIndex = defaultFolderPath ? 1 : 0; // 如果有默认文件夹，选中它；否则选中根目录
-			} else {
-				currentOptions = folderOptions.filter(option => {
-					return option.text.toLowerCase().includes(searchTerm);
-				});
-				selectedIndex = 0;
-			}
-			
-			renderDropdown(currentOptions);
-		});
-		
-		// 键盘导航
-		searchInput.addEventListener('keydown', (e) => {
-			if (e.key === 'ArrowDown') {
-				e.preventDefault();
-				selectedIndex = Math.min(selectedIndex + 1, currentOptions.length - 1);
-				renderDropdown(currentOptions);
-				const items = dropdownList.querySelectorAll('.folder-dropdown-item');
-				if (items[selectedIndex]) {
-					items[selectedIndex].scrollIntoView({ block: 'nearest' });
-				}
-			} else if (e.key === 'ArrowUp') {
-				e.preventDefault();
-				selectedIndex = Math.max(selectedIndex - 1, 0);
-				renderDropdown(currentOptions);
-				const items = dropdownList.querySelectorAll('.folder-dropdown-item');
-				if (items[selectedIndex]) {
-					items[selectedIndex].scrollIntoView({ block: 'nearest' });
-				}
-			} else if (e.key === 'Enter') {
-				e.preventDefault();
-				if (currentOptions[selectedIndex]) {
-					const option = currentOptions[selectedIndex];
-					this.selectedFolderPath = option.value;
-					displayInput.value = option.text;
-					searchInput.value = '';
-					hideDropdown();
-				}
-			} else if (e.key === 'Escape') {
-				e.preventDefault();
-				hideDropdown();
-			}
-		});
-		
-		// 点击外部区域时隐藏下拉列表
-		const handleClickOutside = (e: MouseEvent) => {
-			if (!folderContainer.contains(e.target as Node)) {
-				hideDropdown();
-			}
-		};
-		
-		document.addEventListener('click', handleClickOutside);
-		
-		// 清理事件监听器（在模态框关闭时）
-		const originalOnClose = this.onClose.bind(this);
-		this.onClose = () => {
-			document.removeEventListener('click', handleClickOutside);
-			originalOnClose();
-		};
-		
-		// 初始渲染
-		renderDropdown(currentOptions);
 
 		// 获取模板文件夹中的所有文件
 		this.loadTemplateFiles();
@@ -407,7 +201,7 @@ class TemplateSelectorModal extends Modal {
 				cls: 'mod-cta template-button'
 			});
 			blankButton.addEventListener('click', async () => {
-				await this.plugin.createFileFromTemplate('', this.selectedFolderPath);
+				await this.plugin.createFileFromTemplate('');
 				this.close();
 			});
 		} else {
@@ -433,7 +227,7 @@ class TemplateSelectorModal extends Modal {
 				});
 
 				button.addEventListener('click', async () => {
-					await this.plugin.createFileFromTemplate(template.path, this.selectedFolderPath);
+					await this.plugin.createFileFromTemplate(template.path);
 					this.close();
 				});
 			});
@@ -454,7 +248,7 @@ class TemplateSelectorModal extends Modal {
 				cls: 'mod-secondary template-button'
 			});
 			blankButton.addEventListener('click', async () => {
-				await this.plugin.createFileFromTemplate('', this.selectedFolderPath);
+				await this.plugin.createFileFromTemplate('');
 				this.close();
 			});
 		}
@@ -468,30 +262,6 @@ class TemplateSelectorModal extends Modal {
 		cancelButton.addEventListener('click', () => {
 			this.close();
 		});
-	}
-
-	loadAllFolders() {
-		// 获取所有文件夹
-		this.allFolders = [];
-		const root = this.app.vault.getRoot();
-		
-		const traverse = (folder: TFolder) => {
-			this.allFolders.push(folder);
-			if (folder.children) {
-				folder.children.forEach(child => {
-					if (child instanceof TFolder) {
-						traverse(child);
-					}
-				});
-			}
-		};
-		
-		if (root instanceof TFolder) {
-			traverse(root);
-		}
-		
-		// 按路径排序
-		this.allFolders.sort((a, b) => a.path.localeCompare(b.path));
 	}
 
 	loadTemplateFiles() {
